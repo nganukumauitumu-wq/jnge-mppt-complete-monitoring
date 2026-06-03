@@ -24,7 +24,7 @@ jobs:
         run: |
           esphome compile jnge-mppt.yaml
 
-      # FORCE SEARCH: This automatically finds the .bin file wherever it is hidden
+      # SMART SEARCH: Automatically finds and grabs the firmware file anywhere in the build tree
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
