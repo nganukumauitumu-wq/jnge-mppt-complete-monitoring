@@ -24,18 +24,11 @@ jobs:
         run: |
           esphome compile jnge-mppt.yaml
 
-      # PERBAIKAN UTAMA: Mengubah pencarian berkas secara rekursif agar terhindar dari ketidakcocokan folder internal
+      # FORCE SEARCH: This automatically finds the .bin file wherever it is hidden
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: esp32-firmware
-          path: .esphome/build/jnge-mppt-complete-monitoring/.pioenvs/jnge-mppt-complete-monitoring/firmware.bin
-          if-no-files-found: warn
-
-      # JALUR BYPASS CADANGAN: Jika folder pioenvs di atas kosong, robot akan mengamankan file dari jalur alternatif secara otomatis
-      - name: Upload Alternative Binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: esp32-firmware-backup
-          path: .esphome/build/jnge-mppt-complete-monitoring/firmware.bin
-          if-no-files-found: ignore
+          name: esp32-mppt-firmware
+          path: |
+            .esphome/build/**/*.bin
+          if-no-files-found: error
