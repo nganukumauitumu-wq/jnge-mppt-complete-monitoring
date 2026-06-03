@@ -11,16 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Forces the environment to clean up legacy dependencies
       - name: Configure Runner Environment
         run: |
           echo "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true" >> $GITHUB_ENV
           echo "PLATFORMIO_DISABLE_CACHE=true" >> $GITHUB_ENV
 
+      # Using Python 3.10 for the highest stability with PlatformIO core
       - name: Set up Python Environment
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
       - name: Configure System Git
         run: |
@@ -28,11 +28,15 @@ jobs:
           git config --global user.email "mppt@monitoring.local"
           git config --global user.name "ESP32 Compiler"
 
-      # Clear local pip cache to prevent mismatched installation tools
-      - name: Install ESPHome Compiler Core
+      - name: Install ESPHome & PlatformIO Core
         run: |
-          pip install --no-cache-dir --upgrade pip
-          pip install --no-cache-dir esphome platformio
+          pip install --no-cache-dir --upgrade pip wheel setuptools
+          pip install --no-cache-dir platformio esphome
+
+      # FORCE INITIALIZATION: Installs the platform tools so compilation won't throw exit code 2
+      - name: Pre-install ESP32 Platform Tools
+        run: |
+          platformio platform install espressif32
 
       - name: Raw Compile Firmware Execution
         run: |
