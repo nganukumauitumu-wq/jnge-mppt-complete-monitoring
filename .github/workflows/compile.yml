@@ -11,17 +11,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Fix for the 2026 Node runner warning
-      - name: Configure Node24 Environment
-        run: echo "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true" >> $GITHUB_ENV
-
-      # Use the official isolated ESPHome compiler container to bypass all host server bugs
-      - name: Compile ESPHome Firmware
-        uses: esphome/build-action@v3.2.0
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
         with:
-          yaml_file: jnge-mppt.yaml
+          python-version: '3.11'
 
-      - name: Upload Binary Artifact
+      # TRICK SYSTEM: Creates a fake Git environment variables structure to fool PlatformIO safely
+      - name: Fake Git Environment Mocking
+        run: |
+          sudo apt-get update && sudo apt-get install -y git
+          git config --global user.email "mppt@monitoring.local"
+          git config --global user.name "ESP32 Compiler"
+
+      - name: Install ESPHome Compiler Core
+        run: |
+          pip install --upgrade pip
+          pip install esphome platformio
+
+      - name: Raw Compile Firmware Execution
+        run: |
+          esphome compile jnge-mppt.yaml
+
+      - name: Export Output Binary Archive
         uses: actions/upload-artifact@v4
         with:
           name: esp32-mppt-firmware
