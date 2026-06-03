@@ -11,23 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
       # Fix for the 2026 Node runner warning
-      - name: Configure Environment
+      - name: Configure Node24 Environment
         run: echo "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true" >> $GITHUB_ENV
 
-      - name: Install ESPHome & PlatformIO
-        run: |
-          pip install esphome platformio
-
-      - name: Compile Firmware
-        # MATCHING FIX: Points directly to your jnge-mppt.yaml file
-        run: |
-          esphome compile jnge-mppt.yaml
+      # Use the official isolated ESPHome compiler container to bypass all host server bugs
+      - name: Compile ESPHome Firmware
+        uses: esphome/build-action@v3.2.0
+        with:
+          yaml_file: jnge-mppt.yaml
 
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
