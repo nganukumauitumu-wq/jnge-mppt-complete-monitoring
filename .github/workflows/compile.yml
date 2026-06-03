@@ -11,22 +11,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Forces the environment to clean up legacy dependencies
+      - name: Configure Runner Environment
+        run: |
+          echo "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true" >> $GITHUB_ENV
+          echo "PLATFORMIO_DISABLE_CACHE=true" >> $GITHUB_ENV
+
       - name: Set up Python Environment
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # TRICK SYSTEM: Creates a fake Git environment variables structure to fool PlatformIO safely
-      - name: Fake Git Environment Mocking
+      - name: Configure System Git
         run: |
           sudo apt-get update && sudo apt-get install -y git
           git config --global user.email "mppt@monitoring.local"
           git config --global user.name "ESP32 Compiler"
 
+      # Clear local pip cache to prevent mismatched installation tools
       - name: Install ESPHome Compiler Core
         run: |
-          pip install --upgrade pip
-          pip install esphome platformio
+          pip install --no-cache-dir --upgrade pip
+          pip install --no-cache-dir esphome platformio
 
       - name: Raw Compile Firmware Execution
         run: |
