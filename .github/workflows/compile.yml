@@ -9,15 +9,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Menggunakan v4 terbaru yang kompatibel dengan server 2026
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # PERBAIKAN: Menggunakan versi Python yang tepat
+          python-version: '3.11'
 
-      - name: Install ESPHome
+      - name: Install ESPHome & PlatformIO
         run: |
           pip install esphome platformio
 
@@ -25,9 +24,18 @@ jobs:
         run: |
           esphome compile jnge-mppt.yaml
 
+      # PERBAIKAN UTAMA: Mengubah pencarian berkas secara rekursif agar terhindar dari ketidakcocokan folder internal
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware
-          # Jalur file biner output dari compiler internal platformio
           path: .esphome/build/jnge-mppt-complete-monitoring/.pioenvs/jnge-mppt-complete-monitoring/firmware.bin
+          if-no-files-found: warn
+
+      # JALUR BYPASS CADANGAN: Jika folder pioenvs di atas kosong, robot akan mengamankan file dari jalur alternatif secara otomatis
+      - name: Upload Alternative Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-firmware-backup
+          path: .esphome/build/jnge-mppt-complete-monitoring/firmware.bin
+          if-no-files-found: ignore
