@@ -1,0 +1,31 @@
+name: Compile ESPHome Binary
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-size: '3.11'
+
+      - name: Install ESPHome
+        run: |
+          pip install esphome platformio
+
+      - name: Compile Firmware
+        run: |
+          esphome compile jnge-mppt.yaml
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-firmware
+          path: .esphome/build/jnge-mppt-complete-monitoring/.pioenvs/jnge-mppt-complete-monitoring/firmware.bin
