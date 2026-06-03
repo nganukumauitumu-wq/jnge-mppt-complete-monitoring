@@ -9,12 +9,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Menggunakan v4 terbaru yang kompatibel dengan server 2026
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-size: '3.11'
+          python-version: '3.11' # PERBAIKAN: Menggunakan versi Python yang tepat
 
       - name: Install ESPHome
         run: |
@@ -28,4 +29,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware
+          # Jalur file biner output dari compiler internal platformio
           path: .esphome/build/jnge-mppt-complete-monitoring/.pioenvs/jnge-mppt-complete-monitoring/firmware.bin
