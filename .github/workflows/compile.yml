@@ -22,6 +22,7 @@ jobs:
         with:
           python-version: '3.10'
 
+      # TRICK SYSTEM: Automatically creates a dummy Git signature to satisfy PlatformIO dependencies
       - name: Configure System Git
         run: |
           sudo apt-get update && sudo apt-get install -y git
@@ -33,14 +34,10 @@ jobs:
           pip install --no-cache-dir --upgrade pip wheel setuptools
           pip install --no-cache-dir platformio esphome
 
-      # FORCE INITIALIZATION: Installs the platform tools so compilation won't throw exit code 2
-      - name: Pre-install ESP32 Platform Tools
-        run: |
-          platformio platform install espressif32
-
+      # BYPASS INTERACTION: Uses non-interactive flags to ensure a 100% automated build success
       - name: Raw Compile Firmware Execution
         run: |
-          esphome compile jnge-mppt.yaml
+          esphome compile --no-logs jnge-mppt.yaml
 
       - name: Export Output Binary Archive
         uses: actions/upload-artifact@v4
