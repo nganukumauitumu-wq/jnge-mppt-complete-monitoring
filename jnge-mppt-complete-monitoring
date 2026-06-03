@@ -1,0 +1,99 @@
+esphome:
+  name: jnge-mppt-complete-monitoring
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+preferences:
+  flash_write_interval: 1min 
+
+wifi:
+  ssid: "QueenAraintaN"
+  password: "Takonokono06"
+
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: "Asia/Jakarta" 
+    on_time:
+      - cron: "0 0 0 1 * *" 
+        then:
+          - sensor.template.publish:
+              id: monthly_kwh
+              state: 0.0
+
+web_server:
+  port: 80
+  version: 3
+
+sensor:
+  - platform: template
+    name: "PV Input Voltage"
+    id: pv_voltage
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+
+  - platform: template
+    name: "PV Input Current"
+    id: pv_current
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+
+  - platform: template
+    name: "Battery Output Voltage"
+    id: battery_voltage
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+
+  - platform: template
+    name: "Battery Output Current"
+    id: battery_current
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+
+  - platform: template
+    name: "Total Charging Capacity"
+    id: jnge_total_ah
+    unit_of_measurement: "Ah"
+    accuracy_decimals: 0
+
+  - platform: template
+    name: "PV Input Power"
+    id: pv_power
+    unit_of_measurement: "W"
+    accuracy_decimals: 1
+    update_interval: 5s
+    lambda: |-
+      return id(pv_voltage).state * id(pv_current).state;
+
+  - platform: template
+    name: "Battery Output Power"
+    id: battery_power
+    unit_of_measurement: "W"
+    accuracy_decimals: 1
+    update_interval: 5s
+    lambda: |-
+      return id(battery_voltage).state * id(battery_current).state;
+
+  - platform: total_daily_energy
+    name: "Daily Energy Production"
+    id: daily_kwh
+    power_id: pv_power
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001
+
+  - platform: integration
+    name: "Monthly Energy Production"
+    id: monthly_kwh
+    sensor: pv_power
+    time_unit: h
+    integration_method: trapezoid
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 3
+    restore: true 
+    filters:
+      - multiply: 0.001
